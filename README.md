@@ -1,7 +1,7 @@
 # Fund Flow Portfolio Reccomendation Agent
 
 ## Activate Virtual Env
-python3 -m venv venv
+python3 -m venv venv  
 source venv/bin/activate
 
 ## Install dependencies
@@ -19,5 +19,5 @@ docker build -t fund-flow-agent .
 docker run -d -p 8000:8000 --env-file .env --name fund-flow-agent fund-flow-agent
 
 ## Push to Dockerhub
-docker tag fund-flow-agent:latest ongyimeng/fund-flow:latest
+docker tag fund-flow-agent:latest ongyimeng/fund-flow:latest  
 docker push ongyimeng/fund-flow:latest
