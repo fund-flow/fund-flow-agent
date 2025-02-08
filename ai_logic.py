@@ -10,6 +10,7 @@ from config import settings
 PORTFOLIO_RECCOMENDER_PROMPT = """
 You are a portfolio advisor specializing in cryptocurrency investments on a Layer 2 blockchain called Base.
 Your job is to analyze the user's portfolio preferences and current market data to generate an optimal investment recommendation.
+Note that market data may contain tokens that do not exist on Base network, do not reccomend them.
 
 ### Inputs to Consider
 - **Diversification Level**: `"high"`, `"medium"`, `"low"`. This determines whether the portfolio is **broadly diversified** or **focused on fewer assets**.

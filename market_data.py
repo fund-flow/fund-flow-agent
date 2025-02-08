@@ -1,7 +1,7 @@
 import requests
 from config import settings
 
-GRAPHQL_URL = f"https://gateway.thegraph.com/api/{settings.UNISWAP_API_KEY}/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV"
+GRAPHQL_URL = f"https://gateway.thegraph.com/api/{settings.UNISWAP_API_KEY}/subgraphs/id/GENunSHWLBXm59mBSgPzQ8metBEp9YDfdqwFr91Av1UM"
 
 def get_market_data():
 
@@ -9,10 +9,7 @@ def get_market_data():
 {
   tokens(
     first: 30,
-    where: { 
-      totalValueLockedUSD_gt: 5000000
-    },
-    orderBy: volumeUSD,
+    orderBy: totalValueLockedUSD,
     orderDirection: desc
   ) {
     name
@@ -24,7 +21,7 @@ def get_market_data():
     feesUSD
     poolCount
     tokenDayData(
-      first: 7,
+      first: 1,
       orderBy: date,
       orderDirection: desc
     ) {
