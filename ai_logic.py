@@ -36,6 +36,24 @@ Your response must be in JSON format with the following structure as an example
 }
 """
 
+
+RECOMMENDATION_VALIDATOR_PROMPT = """
+You are given input that contains a list of assets and their corresponding allocations.
+Your job is to correct the wrong input to ensure the allocations add up to exactly 1.
+
+Return the updated JSON object with the corrected allocations.
+Your response must be in JSON format with the following structure as an example
+{
+  "assets": ["cbETH", "CBBTC"],
+  "allocations": [0.6, 0.4],
+  "analysis": {
+    "cbETH": "Reason",
+    "CBBTC": "Reason"
+  }
+}
+"""
+
+
 class LangGraphChatBot:
     def __init__(self):
         """Initialize the AI model and build the LangGraph workflow."""
@@ -82,6 +100,41 @@ class LangGraphChatBot:
         state["analysis"] = response["analysis"]
 
         return state
+    
+
+    def _recommendation_validator(self, state: ChatState) -> ChatState:
+        """Check that allocations add up to 1.0 (100%)"""
+        current_sum = sum(state["allocations"] or [])
+        if current_sum == 1.0:
+            return state
+
+        user_prompt = f"""
+        - Current Sum of Allocations: {current_sum}
+        - Assets: {state["assets"]}
+        - Allocations: {state["allocations"]}
+        - Analysis: {state["analysis"]}
+        """
+
+        messages = [
+            {"role": "system", "content": RECOMMENDATION_VALIDATOR_PROMPT},
+            {"role": "user", "content": user_prompt}
+        ]
+
+        response = self.llm.beta.chat.completions.parse(
+            model="gpt-4o-2024-11-20",
+            temperature=0,
+            messages=messages,
+            response_format=Portfolio_Output
+        )
+    
+        response = response.choices[0].message.content
+        response = json.loads(response)     # converts str to dict
+
+        state["assets"] = response["assets"]
+        state["allocations"] = response["allocations"]
+        state["analysis"] = response["analysis"]
+
+        return state
 
 
     def _build_workflow(self) -> StateGraph:
@@ -89,10 +142,13 @@ class LangGraphChatBot:
         workflow = StateGraph(ChatState)
         workflow.add_node("fetch_market_data",self._fetch_market_data)
         workflow.add_node("portfolio_recommendation", self._portfolio_recommendation)
+        workflow.add_node("recommendation_validator", self._recommendation_validator)
+
 
         workflow.add_edge(START, "fetch_market_data")  
-        workflow.add_edge("fetch_market_data", "portfolio_recommendation")   
-        workflow.add_edge("portfolio_recommendation", END)       
+        workflow.add_edge("fetch_market_data", "portfolio_recommendation")
+        workflow.add_edge("portfolio_recommendation", "recommendation_validator")
+        workflow.add_edge("recommendation_validator", END)
 
         return workflow.compile()
 

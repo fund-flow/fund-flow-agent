@@ -8,9 +8,9 @@ class TestGetRecommendation(unittest.TestCase):
         chatbot = LangGraphChatBot()
         
         request = ChatRequest(
-            diversification_level="medium",
-            investment_horizon="long",
-            risk_tolerance="medium",
+            diversification_level="high",
+            investment_horizon="short",
+            risk_tolerance="high",
             amount= 100
         )
 
